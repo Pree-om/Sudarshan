@@ -1,224 +1,354 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sudarsahan</title>
+    <title>Sudrashan | AI Misinformation Sentinel</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <!-- Demo Mode - No external OAuth dependencies -->
 </head>
 <body>
-    <header>
+    <!-- 3D Background -->
+    <div id="canvas-container"></div>
+    <div class="scan-line"></div>
+    <div class="vignette"></div>
+
+    <!-- Navigation -->
+    <header class="glass-panel">
         <nav>
-            <h1 id="logo">Sudarsahan</h1>
+            <div class="logo-container">
+                <img src="./assets/WhatsApp Image 2025-11-29 at 07.44.07_a570288a.jpg" alt="Sudrashan Logo" style="height: 40px; width: auto;">
+                <h1 id="logo">सु<span class="highlight"><span style="color: var(--neon-cyan)">DARSHAN</span></h1>
+            </div>
             <ul id="nav-menu">
-                <li><a href="#home" onclick="showSection('home')">Home</a></li>
-                <li><a href="#pricing" onclick="showSection('pricing')">Pricing</a></li>
-                <li><a href="#enterprise" onclick="showSection('enterprise')">Enterprise</a></li>
-                <li><a href="#api" onclick="showSection('api')">API</a></li>
-                <li><a href="#about" onclick="showSection('about')">About</a></li>
+                <li><a href="#home" onclick="showSection('home')" class="nav-link active"><span>//</span> MONITOR</a></li>
+                <li><a href="#pricing" onclick="showSection('pricing')" class="nav-link"><span>//</span> ACCESS</a></li>
+                <li><a href="#enterprise" onclick="showSection('enterprise')" class="nav-link"><span>//</span> ENTERPRISE</a></li>
+                <li><a href="#api" onclick="showSection('api')" class="nav-link"><span>//</span> API</a></li>
+                <li id="signin-container">
+                    <button onclick="showSignInModal()" class="cyber-btn small" id="signin-btn">
+                        <i class="fa-solid fa-user"></i> SIGN IN
+                    </button>
+                </li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <section id="home" class="section active">
-            <h2>Sudrashan - Misinformation Detection</h2>
-            <p id="dynamic-text">Detect misinformation in text and images</p>
-            <div class="samples-section">
-                <h3>🧪 Try Sample Cases</h3>
-                <div class="sample-buttons">
-                    <button onclick="loadSample('fake-news')" class="sample-btn">Fake News Sample</button>
-                    <button onclick="loadSample('misinformation')" class="sample-btn">Misinformation Sample</button>
-                    <button onclick="loadSample('verified')" class="sample-btn">Verified News Sample</button>
-                    <button onclick="loadSample('rumor')" class="sample-btn">Rumor Sample</button>
+        <!-- Home / Dashboard Section -->
+        <section id="home" class="section active dashboard-grid">
+            
+            <!-- Left Column: Scanner -->
+            <div class="main-scanner-area">
+                <div class="hero-text">
+                    <h2 class="glitch" data-text="Stop guessing. Start knowing.">Stop guessing. Start knowing.</h2>
+                    <p id="dynamic-text">INITIALIZING AGENTIC AI...</p>
+                </div>
+
+                <!-- Samples Control -->
+                <div class="control-panel glass-panel">
+                    <div class="panel-header">
+                        <span>LOAD TEST VECTORS</span>
+                    </div>
+                    <div class="sample-buttons">
+                        <button onclick="loadSample('fake-news')" class="cyber-btn"><span>FAKE NEWS</span></button>
+                        <button onclick="loadSample('misinformation')" class="cyber-btn"><span>MISINFO</span></button>
+                        <button onclick="loadSample('verified')" class="cyber-btn success"><span>VERIFIED</span></button>
+                        <button onclick="loadSample('rumor')" class="cyber-btn warning"><span>RUMOR</span></button>
+                    </div>
+                </div>
+                
+                <!-- Input Interface -->
+                <div class="input-container glass-panel">
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="switchTab('text')"><i class="fa-solid fa-paragraph"></i> TEXT ANALYSIS</button>
+                        <button class="tab-btn" onclick="switchTab('image')"><i class="fa-solid fa-image"></i> IMAGE FORENSICS</button>
+                    </div>
+
+                    <div id="text-tab" class="tab-content active">
+                        <textarea id="text-input" placeholder=">> INPUT DATA STREAM FOR ANALYSIS..."></textarea>
+                        <div class="action-bar">
+                            <select id="lang-select" class="cyber-select">
+                                <option value="auto">AUTO DETECT</option>
+                                <option value="en">ENGLISH</option>
+                                <option value="hi">HINDI</option>
+                                <option value="bn">BENGALI</option>
+                                <option value="mr">MARATHI</option>
+                                <option value="ta">TAMIL</option>
+                            </select>
+                            <button onclick="processText()" class="cyber-btn primary glitch-hover">
+                                <i class="fa-solid fa-bolt"></i> <span>INITIATE SCAN</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="image-tab" class="tab-content">
+                        <div class="upload-zone" id="upload-area">
+                            <i class="fa-solid fa-cloud-arrow-up fa-3x"></i>
+                            <p>DROP EVIDENCE FILES HERE</p>
+                            <input type="file" id="image-input" accept="image/*" multiple hidden>
+                        </div>
+                        <button onclick="document.getElementById('image-input').click()" class="cyber-btn">BROWSE FILES</button>
+                        <button onclick="processImages()" class="cyber-btn primary" style="margin-top: 10px;">SCAN IMAGES</button>
+                        <div id="upload-results"></div>
+                    </div>
+                </div>
+
+                <!-- Analysis Results Output -->
+                <div id="results" class="results-container"></div>
+                
+                <!-- Premium Insights -->
+                <div class="premium-feature glass-panel" id="weekly-insights" style="display: none;">
+                    <div class="premium-header">
+                        <h3>INTELLIGENCE BRIEFING</h3>
+                    </div>
+                    <button onclick="generateWeeklyReport()" class="cyber-btn gold">GENERATE REPORT</button>
+                    <div id="weekly-report"></div>
                 </div>
             </div>
-            
-            <div class="input-container">
-                <div class="input-group">
-                    <h3>Text Input</h3>
-                    <textarea id="text-input" placeholder="Enter your text here or try a sample above..."></textarea>
-                    <button onclick="processText()">Process Text</button>
+
+            <!-- Right Column: Live Feed -->
+            <div class="live-feed-sidebar glass-panel">
+                <div class="sidebar-header">
+                    <div class="led red blink"></div>
+                    <h3>GLOBAL THREAT FEED</h3>
                 </div>
-                <div class="input-group">
-                    <h3>Image Input</h3>
-                    <input type="file" id="image-input" accept="image/*" multiple>
-                    <button onclick="processImages()">Process Images</button>
+                <div class="feed-container" id="news-feed">
+                    <!-- News items injected via JS -->
+                    <div class="loader-text">CONNECTING TO SATELLITE...</div>
                 </div>
-            </div>
-            <div id="results" class="results-container"></div>
-            
-            <div class="premium-feature" id="weekly-insights" style="display: none;">
-                <h3>📈 Weekly Misinformation Insights (Premium)</h3>
-                <button onclick="generateWeeklyReport()" class="premium-btn">Generate This Week's Report</button>
-                <div id="weekly-report"></div>
             </div>
         </section>
 
-        <section id="about" class="section">
-            <h2>Why Choose Sudrashan?</h2>
-            <div class="value-props">
-                <div class="value-prop">
-                    <h3>🎯 99.2% Accuracy</h3>
-                    <p>Industry-leading precision with 5-layer AI verification system</p>
-                </div>
-                <div class="value-prop">
-                    <h3>⚡ Real-time Processing</h3>
-                    <p>Get results in 2-3 seconds with Groq's lightning-fast LLMs</p>
-                </div>
-                <div class="value-prop">
-                    <h3>🌍 Global Coverage</h3>
-                    <p>Support for 12+ languages with automatic translation</p>
-                </div>
-                <div class="value-prop">
-                    <h3>🔒 Enterprise Security</h3>
-                    <p>SOC 2 compliant, GDPR ready, zero data retention policy</p>
-                </div>
-            </div>
-            <div class="stats">
-                <div class="stat">
-                    <h3>1M+</h3>
-                    <p>Content pieces analyzed</p>
-                </div>
-                <div class="stat">
-                    <h3>500+</h3>
-                    <p>Enterprise customers</p>
-                </div>
-                <div class="stat">
-                    <h3>99.9%</h3>
-                    <p>Uptime SLA</p>
-                </div>
-            </div>
-        </section>
-
+        <!-- Pricing Section -->
         <section id="pricing" class="section">
-            <h2>Choose Your Plan</h2>
+            <h2 class="section-title">CLEARANCE LEVELS</h2>
             <div class="pricing-container">
-                <div class="pricing-card free">
-                    <h3>Free Trial</h3>
-                    <div class="price">₹0<span>/month</span></div>
+                <div class="pricing-card glass-panel">
+                    <div class="card-header">
+                        <h3>CIVILIAN</h3>
+                        <div class="price">₹0<span>/mo</span></div>
+                    </div>
                     <ul>
-                        <li>✅ 10 checks per day</li>
-                        <li>✅ Basic misinformation detection</li>
-                        <li>✅ Text & image analysis</li>
-                        <li>❌ API access</li>
-                        <li>❌ Bulk processing</li>
+                        <li>10 Scans / Day</li>
+                        <li>Basic Detection</li>
+                        <li>No API Access</li>
                     </ul>
-                    <button class="pricing-btn" onclick="selectPlan('free')">Start Free</button>
+                    <button class="cyber-btn" onclick="selectPlan('free')">ACTIVATE</button>
                 </div>
-                <div class="pricing-card pro">
-                    <h3>Professional</h3>
-                    <div class="price">₹4,099<span>/month</span></div>
+                <div class="pricing-card glass-panel featured">
+                    <div class="card-header">
+                        <h3>OPERATOR</h3>
+                        <div class="price">₹4,099<span>/mo</span></div>
+                    </div>
                     <ul>
-                        <li>✅ 1,000 checks per day</li>
-                        <li>✅ Advanced 5-layer detection</li>
-                        <li>✅ Weekly misinformation insights</li>
-                        <li>✅ API access (1000 calls/month)</li>
-                        <li>✅ Bulk file processing</li>
-                        <li>✅ Priority support</li>
+                        <li>1,000 Scans / Day</li>
+                        <li>5-Layer AI Verification</li>
+                        <li>News API Integration (70K+ Sources)</li>
+                        <li>Weekly Intelligence Reports</li>
+                        <li>Multi-AI Consensus Engine</li>
+                        <li>Context Manipulation Detection</li>
+                        <li>Visual Editing Analysis</li>
+                        <li>Critical Threat Alerts</li>
+                        <li>Source Credibility Scoring</li>
+                        <li>API Access (1000 calls/month)</li>
+                        <li>Bulk File Processing</li>
+                        <li>Exportable PDF Reports</li>
                     </ul>
-                    <button class="pricing-btn" onclick="selectPlan('pro')">Choose Pro</button>
+                    <button class="cyber-btn primary" onclick="selectPlan('pro')">UPGRADE</button>
                 </div>
-                <div class="pricing-card enterprise">
-                    <h3>Enterprise</h3>
-                    <div class="price">Custom</div>
+                <div class="pricing-card glass-panel">
+                    <div class="card-header">
+                        <h3>COMMANDER</h3>
+                        <div class="price">CUSTOM</div>
+                    </div>
                     <ul>
-                        <li>✅ Unlimited checks</li>
-                        <li>✅ Daily misinformation reports</li>
-                        <li>✅ White-label solution</li>
-                        <li>✅ Custom integrations</li>
-                        <li>✅ Dedicated support</li>
-                        <li>✅ SLA guarantees</li>
+                        <li>Unlimited Scans</li>
+                        <li>Daily Intelligence Reports</li>
+                        <li>White-label Solution</li>
+                        <li>Custom Integrations</li>
+                        <li>Geographic Spread Analysis</li>
+                        <li>SLA Guarantees</li>
+                        <li>Priority Support</li>
+                        <li>Dedicated Account Manager</li>
+                        <li>Advanced Threat Monitoring</li>
                     </ul>
-                    <button class="pricing-btn" onclick="selectPlan('enterprise')">Contact Sales</button>
+                    <button class="cyber-btn" onclick="selectPlan('enterprise')">CONTACT HQ</button>
                 </div>
             </div>
         </section>
 
+        <!-- Enterprise Section -->
         <section id="enterprise" class="section">
-            <h2>Enterprise Solutions</h2>
+            <h2 class="section-title">SECTOR INTEGRATION</h2>
             <div class="enterprise-grid">
-                <div class="enterprise-card">
-                    <h3>🏢 News Organizations</h3>
-                    <p>Real-time fact-checking for newsrooms. Verify sources before publication.</p>
-                    <ul>
-                        <li>Journalist workflow integration</li>
-                        <li>Editorial dashboard</li>
-                        <li>Source credibility scoring</li>
-                    </ul>
+                <div class="enterprise-card glass-panel">
+                    <h3>Newsrooms</h3>
+                    <p>Real-time fact checking for editorial integrity.</p>
                 </div>
-                <div class="enterprise-card">
-                    <h3>🏛️ Government Agencies</h3>
-                    <p>Combat disinformation campaigns and protect public information integrity.</p>
-                    <ul>
-                        <li>Threat intelligence feeds</li>
-                        <li>Campaign monitoring</li>
-                        <li>Public safety alerts</li>
-                    </ul>
+                <div class="enterprise-card glass-panel">
+                    <h3>Government</h3>
+                    <p>Counter-disinformation ops and public safety.</p>
                 </div>
-                <div class="enterprise-card">
-                    <h3>📱 Social Media Platforms</h3>
-                    <p>Automated content moderation and misinformation flagging at scale.</p>
-                    <ul>
-                        <li>Real-time API integration</li>
-                        <li>Bulk content analysis</li>
-                        <li>Custom detection rules</li>
-                    </ul>
-                </div>
-                <div class="enterprise-card">
-                    <h3>🎓 Educational Institutions</h3>
-                    <p>Teach media literacy and critical thinking with AI-powered tools.</p>
-                    <ul>
-                        <li>Student dashboard</li>
-                        <li>Learning analytics</li>
-                        <li>Curriculum integration</li>
-                    </ul>
+                <div class="enterprise-card glass-panel">
+                    <h3>Social Platforms</h3>
+                    <p>Automated moderation at scale.</p>
                 </div>
             </div>
         </section>
 
+        <!-- API Section -->
         <section id="api" class="section">
-            <h2>Developer API</h2>
-            <div class="api-container">
+            <h2 class="section-title">DEVELOPER PROTOCOLS</h2>
+            <div class="api-container glass-panel">
                 <div class="api-info">
-                    <h3>Integrate Sudrashan into your applications</h3>
-                    <p>RESTful API with comprehensive misinformation detection capabilities</p>
-                    <div class="api-features">
-                        <div class="api-feature">
-                            <h4>🚀 Fast Response</h4>
-                            <p>Average 2-3 second processing time</p>
+                    <h3>RESTful Endpoint Access</h3>
+                    <p>Integrate the Sudrashan detection engine into your external applications.</p>
+                    <div class="api-stats">
+                        <div class="stat-box">
+                            <span class="big-num">20ms</span>
+                            <span class="label">LATENCY</span>
                         </div>
-                        <div class="api-feature">
-                            <h4>📊 Detailed Analytics</h4>
-                            <p>Confidence scores, source attribution, threat levels</p>
-                        </div>
-                        <div class="api-feature">
-                            <h4>🔒 Enterprise Security</h4>
-                            <p>SOC 2 compliant, encrypted data transmission</p>
+                        <div class="stat-box">
+                            <span class="big-num">99.9%</span>
+                            <span class="label">UPTIME</span>
                         </div>
                     </div>
                 </div>
-                <div class="api-demo">
-                    <h4>API Example</h4>
-                    <pre><code>curl -X POST https://api.sudrashan.com/v1/analyze \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
+                <div class="code-block">
+                    <div class="code-header">BASH</div>
+                    <pre><code>curl -X POST https://api.sudrashan.com/v1/scan \
+  -H "Authorization: Bearer KEY" \
   -d '{
-    "text": "Your content to analyze",
-    "type": "text",
-    "language": "auto"
+    "payload": "content",
+    "mode": "deep_scan"
   }'</code></pre>
-                    <button onclick="showApiDocs()">View Full Documentation</button>
+                    <button onclick="window.open('http://github.com/M0h1tkumar/Sudarshan/blob/main/README.md', '_blank')" class="cyber-btn small">DOCS >></button>
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- Sign In Modal -->
+    <div id="signin-modal" class="modal-overlay" style="display: none;" onclick="closeSignInModal()">
+        <div class="modal-content glass-panel" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-shield-halved"></i> SECURE ACCESS</h3>
+                <button onclick="closeSignInModal()" class="close-btn">&times;</button>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('email')">EMAIL</button>
+                <button class="auth-tab" onclick="switchAuthTab('oauth')">OAUTH</button>
+            </div>
+            
+            <div id="email-auth" class="auth-content active">
+                <form onsubmit="handleEmailSignIn(event)">
+                    <div class="input-group">
+                        <label>EMAIL ADDRESS</label>
+                        <input type="email" id="email-input" placeholder="operator@sudrashan.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label>PASSWORD</label>
+                        <input type="password" id="password-input" placeholder="Enter secure passphrase" required>
+                    </div>
+                    <button type="submit" class="cyber-btn primary full-width">
+                        <i class="fa-solid fa-key"></i> AUTHENTICATE
+                    </button>
+                </form>
+                <div class="auth-footer">
+                    <a href="#" onclick="showForgotPassword()">Forgot Password?</a>
+                    <a href="#" onclick="showRegister()">Create Account</a>
+                </div>
+            </div>
+            
+            <div id="oauth-auth" class="auth-content">
+                <button onclick="handleGoogleSignIn()" class="oauth-btn google">
+                    <i class="fab fa-google"></i> Continue with Google
+                </button>
+                <button onclick="handleGitHubSignIn()" class="oauth-btn github">
+                    <i class="fab fa-github"></i> Continue with GitHub
+                </button>
+                <button onclick="handleMicrosoftSignIn()" class="oauth-btn microsoft">
+                    <i class="fab fa-microsoft"></i> Continue with Microsoft
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPI Payment Modal -->
+    <div id="upi-modal" class="modal-overlay" style="display: none;" onclick="closeUPIModal()">
+        <div class="modal-content glass-panel" onclick="event.stopPropagation()" style="width: 400px;">
+            <div class="modal-header">
+                <h3>UPI Payment</h3>
+                <button onclick="closeUPIModal()" class="close-btn">&times;</button>
+            </div>
+            
+            <div style="padding: 2rem; text-align: center;">
+                <h4 style="color: var(--neon-cyan); margin-bottom: 1rem;">OPERATOR PLAN - ₹4,099/month</h4>
+                
+                <div style="background: white; padding: 1rem; border-radius: 8px; margin: 1rem 0; display: inline-block;">
+                    <div id="upi-qr-code" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; color: #666;">
+                        Generating QR Code...
+                    </div>
+                </div>
+                
+                <p style="margin: 1rem 0; color: #888; font-size: 0.9rem;">Scan QR code with any UPI app</p>
+                
+                <div class="glass-panel" style="padding: 1rem; margin: 1rem 0; text-align: left;">
+                    <p style="margin: 0.5rem 0; font-family: monospace; color: var(--text-primary);"><strong>UPI ID:</strong> 9853224443@ybl</p>
+                    <p style="margin: 0.5rem 0; font-family: monospace; color: var(--text-primary);"><strong>Amount:</strong> ₹4,099</p>
+                    <p style="margin: 0.5rem 0; font-family: monospace; color: var(--text-primary);"><strong>Note:</strong> Operator Plan Subscription</p>
+                </div>
+                
+                <p style="margin-top: 1rem; font-size: 0.8rem; color: #666;">🔒 Secure UPI Payment</p>
+            </div>
+        </div>
+    </div>
+
     <footer>
-        <p>&copy; <span id="current-year"></span> Sudarsahan. All rights reserved.</p>
+        <p>&copy; <span id="current-year"></span> SUDRASHAN DEFENSE SYSTEMS. SECURED CONNECTION.</p>
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #333; font-size: 0.7rem; color: #666;">
+            <p style="margin-bottom: 0.5rem;">The innovation credits goes to</p>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
+                <a href="https://team.org.in" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; color: #666; text-decoration: none;">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfo-_uMp_qKDT6jHEOMJzGVwu2Y7tDyr4DrA&s" alt="TEAM" style="height: 30px;">
+                    <span>TEAM</span>
+                </a>
+                <a href="https://mumbai.gov.in" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; color: #666; text-decoration: none;">
+                    <img src="https://pbs.twimg.com/profile_images/1635026449517236224/JkD0fds__400x400.jpg" alt="Mumbai" style="height: 30px;">
+                    <span>Made in Mumbai</span>
+                </a>
+                <a href="https://hcltech.com" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; color: #666; text-decoration: none;">
+                    <img src="https://logos-world.net/wp-content/uploads/2022/07/HCL-Logo.png" alt="HCLTech" style="height: 30px;">
+                    <span>HCLTech</span>
+                </a>
+                <a href="https://n8n.io" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; color: #666; text-decoration: none;">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnIOC-kcjRYq9omUbaQo4fL2TWi_9fwnhijg&s" alt="n8n" style="height: 30px;">
+                    <span>n8n</span>
+                </a>
+            </div>
+        </div>
     </footer>
 
-    <script src="api-keys.js"></script>
+    <!-- Scripts -->
     <script src="config.js"></script>
     <script src="script.js"></script>
 </body>
